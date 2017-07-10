@@ -24,11 +24,11 @@ import java.util.List;
 
 public class QueryUtils {
 
-    /** Tag for the log messages */
+    /**
+     * Tag for the log messages
+     */
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
     /** Sample JSON response for a USGS query */
-//    private static final String USGS_REQUEST_URL = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=10";
-
 
     /**
      * Create a private constructor because no one should ever create a {@link QueryUtils} object.
@@ -46,14 +46,14 @@ public class QueryUtils {
      * Return a list of {@link Book objects that has been built up from
      * parsing the given JSON response.
      */
-    private static List<Book> extractFeatureFromJson(String earthquakeJSON) {
+    private static List<Book> extractFeatureFromJson(String bookJson) {
         // If the JSON string is empty or null, then return early.
-        if (TextUtils.isEmpty(earthquakeJSON)) {
+        if (TextUtils.isEmpty(bookJson)) {
             return null;
         }
 
-        // Create an empty ArrayList that we can start adding earthquakes to
-        List<Book> earthquakes = new ArrayList<>();
+        // Create an empty ArrayList that we can start adding books to
+        List<Book> books = new ArrayList<>();
 
         // Try to parse the JSON response string. If there's a problem with the way the JSON
         // is formatted, a JSONException exception object will be thrown.
@@ -61,16 +61,16 @@ public class QueryUtils {
         try {
 
             // Create a JSONObject from the JSON response string
-            JSONObject baseJsonResponse = new JSONObject(earthquakeJSON);
+            JSONObject baseJsonResponse = new JSONObject(bookJson);
 
             // Extract the JSONArray associated with the key called "features",
-            // which represents a list of features (or earthquakes).
+            // which represents a list of features (or books).
             JSONArray earthquakeArray = baseJsonResponse.getJSONArray("items");
 
             // For each earthquake in the earthquakeArray, create an {@link Earthquake} object
             for (int i = 0; i < earthquakeArray.length(); i++) {
 
-                // Get a single earthquake at position i within the list of earthquakes
+                // Get a single earthquake at position i within the list of books
                 JSONObject currentEarthquake = earthquakeArray.getJSONObject(i);
 
                 // For a given earthquake, extract the JSONObject associated with the
@@ -88,7 +88,7 @@ public class QueryUtils {
 //                JSONObject authorObject = properties.getJSONObject("authors");
 //                JSONArray authorArray = authorObject.getJSONArray("authors");
                 String authorString = properties.getString("authors");
-                String author = authorString.substring(2, authorString.length() -2 );
+                String author = authorString.substring(2, authorString.length() - 2);
 
 
                 // Extract the value for the key called "time"
@@ -104,10 +104,10 @@ public class QueryUtils {
 
                 // Create a new {@link Earthquake} object with the magnitude, location, time,
                 // and url from the JSON response.
-                Book earthquake = new Book(location,author,url);
+                Book earthquake = new Book(location, author, url);
 
-                // Add the new {@link Earthquake} to the list of earthquakes.
-                earthquakes.add(earthquake);
+                // Add the new {@link Earthquake} to the list of books.
+                books.add(earthquake);
             }
 
         } catch (JSONException e) {
@@ -117,8 +117,8 @@ public class QueryUtils {
             Log.e("QueryUtils", "Problem parsing the earthquake JSON results", e);
         }
 
-        // Return the list of earthquakes
-        return earthquakes;
+        // Return the list of books
+        return books;
     }
 
     /**
@@ -199,7 +199,7 @@ public class QueryUtils {
     /**
      * Query the USGS dataset and return a list of {@link Book} objects.
      */
-    public static List<Book> fetchEarthquakeData(String requestUrl) {
+    public static List<Book> fetchBookData(String requestUrl) {
         // Create URL object
         URL url = createUrl(requestUrl);
 

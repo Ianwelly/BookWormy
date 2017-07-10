@@ -28,26 +28,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.android.bookworm.QueryUtils.fetchEarthquakeData;
+import static com.example.android.bookworm.QueryUtils.fetchBookData;
 
 public class MainActivity extends AppCompatActivity {
 
-    String searchResult;
     BookAdapter mAdapter;
-
-    private static  final String USGS_REQUEST_URL = "https://www.googleapis.com/books/v1/volumes?q=Android";
-
-//            "https://www.googleapis.com/books/v1/volumes?key=API_KEY AIzaSyBRh677vmv1BiYMJTr1oUotcK3TmY0GNUI";
-
-//    /** URL for earthquake data from the USGS dataset */
-//    private static final String USGS_REQUEST_URL =
-//            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=6&limit=10";
+    private TextView mEmptyStateTextView;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -58,44 +51,16 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // Fetch the data remotely
-//                String url;
-//                url = ("https://www.googleapis.com/books/v1/volumes?q=" + query);
-//                Uri.Builder builder = new Uri.Builder();
-//                builder.scheme("https")
-//                        .authority("https://www.googleapis.com")
-//                        .appendPath("books")
-//                        .appendPath("v1")
-//                        .appendPath("volumes")
-//                        .appendPath(query);
-////                        .appendQueryParameter("type", "1")
-////                        .appendQueryParameter("sort", "relevance")
-////                        .fragment("section-name");
-//                String myUrl = builder.build().toString();
-//                Log.v("MainActivity", "My URL" + myUrl);
 
-
-
-                //USGS_REQUEST_URL =  "https://www.googleapis.com/books/v1/volumes?q=" + query;
-//                Log.v("MainAcivity", "fetchEarthQuakeData" + fetchEarthquakeData(query));
-//
-//                Log.v("MainActivity", "Query: " + query);
-                // Reset SearchView
                 String searchResult =  ("https://www.googleapis.com/books/v1/volumes?q=" + query);
                 EarthquakeAsyncTask task = new EarthquakeAsyncTask();
                 task.execute(searchResult);
-
-               
-                Log.v("MainActivity", "task.execute(searchResult): " + searchResult);
-                Log.v("MainActivity", "USGS_rEQUEST_URL: " + USGS_REQUEST_URL);
-
-                Log.v("MainActivity", "searchResult: "+ searchResult);
-
-                //searchResult =  fetchEarthquakeData("https://www.googleapis.com/books/v1/volumes?q=" + query).toString();
                 searchView.clearFocus();
                 searchView.setQuery("", false);
                 searchView.setIconified(true);
+                searchView.setQueryHint("Enter author or title");
                 searchItem.collapseActionView();
+
                 // Set activity title to search query
                 MainActivity.this.setTitle(query);
                 return true;
@@ -110,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Find a reference to the {@link ListView} in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
+        mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
+        mEmptyStateTextView.setText(R.string.Please_enter_author_or_title);
+        earthquakeListView.setEmptyView(mEmptyStateTextView);
 
         // Create a new adapter that takes an empty list of earthquakes as input
         mAdapter = new BookAdapter(this, new ArrayList<Book>());
@@ -144,50 +111,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(websiteIntent);
             }
         });
-
-        // Start the AsyncTask to fetch the earthquake data
-//        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
-////        task.execute(searchResult);
-//
-//        task.execute(searchResult);
-//        Log.v("MainActivity", "task.execute(searchResult): " + searchResult);
-//        Log.v("MainActivity", "USGS_rEQUEST_URL: " + USGS_REQUEST_URL);
-
-
-
-//        // Start the AsyncTask to fetch the earthquake data
-//        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
-//        task.execute(USGS_REQUEST_URL );
     }
 
-    /**
-     * {@link AsyncTask} to perform the network request on a background thread, and then
-     * update the UI with the list of earthquakes in the response.
-     *
-     * AsyncTask has three generic parameters: the input type, a type used for progress updates, and
-     * an output type. Our task will take a String URL, and return an Earthquake. We won't do
-     * progress updates, so the second generic is just Void.
-     *
-     * We'll only override two of the methods of AsyncTask: doInBackground() and onPostExecute().
-     * The doInBackground() method runs on a background thread, so it can run long-running code
-     * (like network activity), without interfering with the responsiveness of the app.
-     * Then onPostExecute() is passed the result of doInBackground() method, but runs on the
-     * UI thread, so it can use the produced data to update the UI.
-     */
     private class EarthquakeAsyncTask extends AsyncTask<String, Void, List<Book>> {
 
-//        JSONParser jParser;
         JSONArray productList;
-        String url= new String();
-        String textSearch;
-//        ProgressDialog pd;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             productList = new JSONArray();
-
-
         }
 
         /**
@@ -198,25 +131,18 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected List<Book> doInBackground(String... urls) {
 
-//             String returnResult = getProductList(url);
             // Don't perform the request if there are no URLs, or the first URL is null
             if (urls.length < 1 || urls[0] == null) {
                 return null;
             }
 
-            //List<Book> result = fetchEarthquakeData(urls[0]);
-            List<Book> result = fetchEarthquakeData(urls[0]);
-            Log.v("MainActivity", "fetchEarthquakeData" + fetchEarthquakeData(urls[0]));
+            List<Book> result = fetchBookData(urls[0]);
+            Log.v("MainActivity", "fetchBookData" + fetchBookData(urls[0]));
             return result;
         }
-
         /**
          * This method runs on the main UI thread after the background work has been
-         * completed. This method receives as input, the return value from the doInBackground()
-         * method. First we clear out the adapter, to get rid of earthquake data from a previous
-         * query to USGS. Then we update the adapter with the new list of earthquakes,
-         * which will trigger the ListView to re-populate its list items.
-         */
+        */
         @Override
         protected void onPostExecute(List<Book> data) {
             // Clear the adapter of previous earthquake data
@@ -229,72 +155,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-//    private void fetchBooks(String query) {
-//        client = new BookClient();
-//        client.getBooks(query, new JsonHttpResponseHandler() {
-//      ...
-//        });
-//    }
-
-
-
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_book_list, menu);
-//        final MenuItem searchItem = menu.findItem(R.id.action_search);
-//        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                // Fetch the data remotely
-////                String url;
-////                url = ("https://www.googleapis.com/books/v1/volumes?q=" + query);
-////                Uri.Builder builder = new Uri.Builder();
-////                builder.scheme("https")
-////                        .authority("https://www.googleapis.com")
-////                        .appendPath("books")
-////                        .appendPath("v1")
-////                        .appendPath("volumes")
-////                        .appendPath(query);
-//////                        .appendQueryParameter("type", "1")
-//////                        .appendQueryParameter("sort", "relevance")
-//////                        .fragment("section-name");
-////                String myUrl = builder.build().toString();
-////                Log.v("MainActivity", "My URL" + myUrl);
-//
-//
-//
-//                searchResult =  fetchEarthquakeData("https://www.googleapis.com/books/v1/volumes?q=" + query);
-//                Log.v("MainAcivity", "fetchEarthQuakeData" + fetchEarthquakeData(query));
-//
-//                Log.v("MainActivity", "Query: " + query);
-//                // Reset SearchView
-////                searchResult =  fetchEarthquakeData("https://www.googleapis.com/books/v1/volumes?q=" + query);
-//                searchView.clearFocus();
-//                searchView.setQuery("", false);
-//                searchView.setIconified(true);
-//                searchItem.collapseActionView();
-//                // Set activity title to search query
-//                MainActivity.this.setTitle(query);
-//                return true;
-//
-//
-//            }
-//
-//
-//
-//            @Override
-//            public boolean onQueryTextChange(String s) {
-//                return false;
-//            }
-//        });
-//        return true;
-//
-//    }
-
 }
 
 

@@ -1,25 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="horizontal"
     android:padding="16dp">
-
-    <!--<ImageView-->
-        <!--android:id="@+id/image_view_thumbnail"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_weight="1"/>-->
 
     <TextView
         android:id="@+id/text_view_title"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal"
         android:layout_weight="1"
+        android:gravity="center_horizontal"
         android:textSize="@dimen/text_size"
-        tools:text="title"/>
+        tools:text="title" />
 
     <TextView
         android:id="@+id/text_view_author"
@@ -28,6 +22,6 @@
         android:layout_weight="1"
         android:gravity="center_horizontal"
         android:textSize="@dimen/text_size"
-        tools:text="author"/>
+        tools:text="author" />
 
 </LinearLayout>
