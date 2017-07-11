@@ -65,31 +65,37 @@ public class QueryUtils {
 
             // Extract the JSONArray associated with the key called "features",
             // which represents a list of features (or books).
-            JSONArray earthquakeArray = baseJsonResponse.getJSONArray("items");
+            JSONArray bookArray = baseJsonResponse.getJSONArray("items");
 
-            // For each earthquake in the earthquakeArray, create an {@link Earthquake} object
-            for (int i = 0; i < earthquakeArray.length(); i++) {
+            // For each earthquake in the bookArray, create an {@link Earthquake} object
+            for (int i = 0; i < bookArray.length(); i++) {
 
                 // Get a single earthquake at position i within the list of books
-                JSONObject currentEarthquake = earthquakeArray.getJSONObject(i);
+                JSONObject currentBook = bookArray.getJSONObject(i);
 
                 // For a given earthquake, extract the JSONObject associated with the
                 // key called "properties", which represents a list of all properties
                 // for that earthquake.
-                JSONObject properties = currentEarthquake.getJSONObject("volumeInfo");
+                JSONObject properties = currentBook.getJSONObject("volumeInfo");
+
 
                 // Extract the value for the key called "mag"
 //                double magnitude = properties.getDouble("mag");
 
-                // Extract the value for the key called "place"
-                String location = properties.getString("title");
+
+
+                // Extract the value for the key called "place".
+                String title = properties.getString("title");
+
 
                 //Extract the value for the key called "author";
 //                JSONObject authorObject = properties.getJSONObject("authors");
 //                JSONArray authorArray = authorObject.getJSONArray("authors");
-                String authorString = properties.getString("authors");
-                String author = authorString.substring(2, authorString.length() - 2);
 
+
+
+                    String authorString = properties.getString("authors");
+                    String author = authorString.substring(2, authorString.length() - 2);
 
                 // Extract the value for the key called "time"
 //                long time = properties.getLong("time");
@@ -104,10 +110,12 @@ public class QueryUtils {
 
                 // Create a new {@link Earthquake} object with the magnitude, location, time,
                 // and url from the JSON response.
-                Book earthquake = new Book(location, author, url);
+                Book earthquake = new Book(title, author, url);
 
                 // Add the new {@link Earthquake} to the list of books.
                 books.add(earthquake);
+
+
             }
 
         } catch (JSONException e) {
@@ -212,10 +220,10 @@ public class QueryUtils {
         }
 
         // Extract relevant fields from the JSON response and create a list of {@link Earthquake}s
-        List<Book> earthquakes = extractFeatureFromJson(jsonResponse);
+        List<Book> books = extractFeatureFromJson(jsonResponse);
 
         // Return the list of {@link Earthquake}s
-        return earthquakes;
+        return books;
     }
 
 }

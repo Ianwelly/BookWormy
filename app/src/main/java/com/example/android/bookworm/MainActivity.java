@@ -15,7 +15,11 @@
  */
 package com.example.android.bookworm;
 
+import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,9 +45,11 @@ public class MainActivity extends AppCompatActivity {
 
     BookAdapter mAdapter;
     private TextView mEmptyStateTextView;
+    private static final int EARTHQUAKE_LOADER_ID = 1;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_book_list, menu);
         final MenuItem searchItem = menu.findItem(R.id.action_search);
@@ -53,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
 
                 String searchResult =  ("https://www.googleapis.com/books/v1/volumes?q=" + query);
-                EarthquakeAsyncTask task = new EarthquakeAsyncTask();
+                BookAsyncTask task = new BookAsyncTask();
                 task.execute(searchResult);
                 searchView.clearFocus();
                 searchView.setQuery("", false);
@@ -81,39 +87,71 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Find a reference to the {@link ListView} in the layout
-        ListView earthquakeListView = (ListView) findViewById(R.id.list);
+        ListView bookLIstView = (ListView) findViewById(R.id.list);
         mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
         mEmptyStateTextView.setText(R.string.Please_enter_author_or_title);
-        earthquakeListView.setEmptyView(mEmptyStateTextView);
+        bookLIstView.setEmptyView(mEmptyStateTextView);
 
         // Create a new adapter that takes an empty list of earthquakes as input
         mAdapter = new BookAdapter(this, new ArrayList<Book>());
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
-        earthquakeListView.setAdapter(mAdapter);
+        bookLIstView.setAdapter(mAdapter);
 
         // Set an item click listener on the ListView, which sends an intent to a web browser
         // to open a website with more information about the selected earthquake.
-        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        bookLIstView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 // Find the current earthquake that was clicked on
-                Book currentEarthquake = mAdapter.getItem(position);
+                Book currentBook = mAdapter.getItem(position);
 
                 // Convert the String URL into a URI object (to pass into the Intent constructor)
-                Uri earthquakeUri = Uri.parse(currentEarthquake.getUrl());
+                Uri bookUri = Uri.parse(currentBook.getUrl());
 
                 // Create a new intent to view the earthquake URI
-                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, earthquakeUri);
+                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, bookUri);
 
                 // Send the intent to launch a new activity
                 startActivity(websiteIntent);
             }
         });
+
+        // Get a reference to the ConnectivityManager to check state of network connectivity
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        // Get details on the currently active default data network
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        // If there is a network connection, fetch data
+        if (networkInfo != null && networkInfo.isConnected()) {
+            // Get a reference to the LoaderManager, in order to interact with loaders.
+            LoaderManager loaderManager = getLoaderManager();
+            mEmptyStateTextView.setText(R.string.Please_enter_author_or_title);
+
+
+//            // Initialize the loader. Pass in the int ID constant defined above and pass in null for
+//            // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
+//            // because this activity implements the LoaderCallbacks interface).
+//            loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
+//        } else {
+//            // Otherwise, display error
+//            // First, hide loading indicator so error message will be visible
+//            View loadingIndicator = findViewById(R.id.loading_indicator);
+//            loadingIndicator.setVisibility(View.GONE);
+
+        } else {
+
+            // Update empty state with no connection error message
+            mEmptyStateTextView.setText(R.string.no_internet_connection);
+        }
     }
 
-    private class EarthquakeAsyncTask extends AsyncTask<String, Void, List<Book>> {
+    private class BookAsyncTask extends AsyncTask<String, Void, List<Book>> {
+
+
 
         JSONArray productList;
 
@@ -142,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
         }
         /**
          * This method runs on the main UI thread after the background work has been
-        */
+         */
         @Override
         protected void onPostExecute(List<Book> data) {
             // Clear the adapter of previous earthquake data
@@ -154,7 +192,10 @@ public class MainActivity extends AppCompatActivity {
                 mAdapter.addAll(data);
             }
         }
-    }
-}
 
+
+    }
+
+
+}
 
