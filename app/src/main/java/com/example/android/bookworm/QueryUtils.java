@@ -63,59 +63,43 @@ public class QueryUtils {
             // Create a JSONObject from the JSON response string
             JSONObject baseJsonResponse = new JSONObject(bookJson);
 
-            // Extract the JSONArray associated with the key called "features",
-            // which represents a list of features (or books).
+            // Extract the JSONArray associated with the key called "items",
+            // which represents a list of items (or books).
+
+            if (baseJsonResponse.has("items")){
             JSONArray bookArray = baseJsonResponse.getJSONArray("items");
 
-            // For each earthquake in the bookArray, create an {@link Earthquake} object
+            // For each book in the bookArray, create an {@link Book} object
             for (int i = 0; i < bookArray.length(); i++) {
 
-                // Get a single earthquake at position i within the list of books
+                // Get a single book at position i within the list of books
                 JSONObject currentBook = bookArray.getJSONObject(i);
 
-                // For a given earthquake, extract the JSONObject associated with the
-                // key called "properties", which represents a list of all properties
-                // for that earthquake.
+                // For a given book, extract the JSONObject associated with the
+                // key called "volumeInfo", which represents a list of all properties
+                // for that book.
                 JSONObject properties = currentBook.getJSONObject("volumeInfo");
 
-
-                // Extract the value for the key called "mag"
-//                double magnitude = properties.getDouble("mag");
-
-
-
-                // Extract the value for the key called "place".
+                // Extract the value for the key called "title".
                 String title = properties.getString("title");
 
-
                 //Extract the value for the key called "author";
-//                JSONObject authorObject = properties.getJSONObject("authors");
-//                JSONArray authorArray = authorObject.getJSONArray("authors");
-
-
-
+                String author = "Author N/A";
+                if (properties.has("authors")) {
                     String authorString = properties.getString("authors");
-                    String author = authorString.substring(2, authorString.length() - 2);
-
-                // Extract the value for the key called "time"
-//                long time = properties.getLong("time");
+                    author = authorString.substring(2, authorString.length() - 2);
+                }
 
                 // Extract the value for the key called "url"
                 String url = properties.getString("previewLink");
 
-//                JSONObject imageLinks = properties.getJSONObject("imageLinks");
-//                String thumbnailString = imageLinks.getString("thumbnail");
-//                Log.v("QueryUtils", "thumbnailString: " + thumbnailString);
-
-
-                // Create a new {@link Earthquake} object with the magnitude, location, time,
+                // Create a new {@link Book} object with the title, author, url
                 // and url from the JSON response.
-                Book earthquake = new Book(title, author, url);
+                Book book = new Book(title, author, url);
 
-                // Add the new {@link Earthquake} to the list of books.
-                books.add(earthquake);
-
-
+                // Add the new {@link Book} to the list of books.
+                books.add(book);
+            }
             }
 
         } catch (JSONException e) {
@@ -205,7 +189,7 @@ public class QueryUtils {
     }
 
     /**
-     * Query the USGS dataset and return a list of {@link Book} objects.
+     * Query the Google dataset and return a list of {@link Book} objects.
      */
     public static List<Book> fetchBookData(String requestUrl) {
         // Create URL object
@@ -219,10 +203,10 @@ public class QueryUtils {
             Log.e(LOG_TAG, "Problem making the HTTP request.", e);
         }
 
-        // Extract relevant fields from the JSON response and create a list of {@link Earthquake}s
+        // Extract relevant fields from the JSON response and create a list of {@link Book}s
         List<Book> books = extractFeatureFromJson(jsonResponse);
 
-        // Return the list of {@link Earthquake}s
+        // Return the list of {@link Book)
         return books;
     }
 
